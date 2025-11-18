@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maliyyə Qeydiyyatı</title>
+    <style>
+        /* CSS HİSSƏSİ (MOBİL UYĞUNLUĞU ÜÇÜN YENİLƏNDİ) */
+        body {
+            background-color: #000000;
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh; /* Tam ekran hündürlüyü təmin edilir */
+            width: 100vw;
+            margin: 0;
+            overflow: hidden; /* Səhifə sürüşdürməsinin qarşısını alır */
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+            box-sizing: border-box;
+            height: 100%; 
+            display: flex;
+            flex-direction: column; /* Elementləri şaquli düzür */
+            justify-content: space-between; /* Boşluqları paylayır */
+            padding: 20px 20px 0; /* Ümumi padding azaldıldı */
+        }
+
+        /* Üst hissə (Toggle, Məbləğ, Kateqoriya) - öz yerini tutur */
+        .top-section {
+            flex-shrink: 0; 
+        }
+
+        .toggle-switch {
+            display: flex;
+            background: #2c2c2c;
+            border-radius: 10px;
+            padding: 4px;
+            margin-bottom: 15px; /* Kiçildildi */
+        }
+
+        .toggle-button {
+            flex-grow: 1;
+            padding: 8px 10px; /* Kiçildildi */
+            border: none;
+            border-radius: 8px;
+            background: transparent;
+            color: #8f8f8f;
+            cursor: pointer;
+            font-size: 15px; /* Kiçildildi */
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .toggle-button.active-expense {
+            background: #444444; 
+            color: #ffffff;
+        }
+
+        .toggle-button.active-income {
+            background: #444444; 
+            color: #ffffff;
+        }
+
+        .amount-display {
+            text-align: center;
+            margin-bottom: 15px; /* Kiçildildi */
+        }
+
+        .amount-display h1 {
+            font-size: 12vw; /* Ekran eninə görə nisbi ölçü */
+            max-font-size: 60px;
+            font-weight: 300;
+            margin: 0;
+            display: inline-block;
+        }
+
+        .currency {
+            font-size: 6vw; /* Ekran eninə görə nisbi ölçü */
+            max-font-size: 30px;
+            margin-right: 10px;
+            vertical-align: top;
+            display: inline-block;
+            line-height: 1.5; 
+        }
+
+        .category-select-wrapper {
+            text-align: center;
+            margin-bottom: 15px; /* Kiçildildi */
+        }
+
+        #Kateqoriya {
+            background: #2c2c2c;
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px; /* Kiçildildi */
+            border-radius: 30px;
+            font-size: 14px; /* Kiçildildi */
+            appearance: none; 
+            cursor: pointer;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            padding-right: 40px; 
+        }
+        
+        /* Klaviatura qrupu - qalan boşluğu doldurur */
+        .keypad-wrapper {
+            flex-grow: 1; /* Mövcud boşluğun hamısını tutur */
+            display: flex;
+            align-items: center; /* Klaviatura gridini mərkəzə gətirir */
+            justify-content: center;
+            padding: 10px 0; /* Yuxarı və aşağı boşluq əlavə edir */
+        }
+
+        .keypad {
+            width: 100%;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px; /* Kiçildilmiş aralıq */
+            text-align: center;
+            /* Əvvəlki padding-bottom ləğv edildi, çünki Submit düyməsi artıq Flex tərəfindən idarə olunur */
+        }
+
+        .key {
+            padding: 12px 0; /* Kiçildilmiş padding */
+            font-size: 24px; /* Kiçildilmiş şrift */
+            font-weight: 300;
+            border-radius: 10px;
+            background: #1c1c1c;
+            cursor: pointer;
+            transition: background 0.1s;
+        }
+
+        .key:active {
+            background: #444444;
+        }
+        
+        /* Təsdiq Düyməsi - aşağıda qalır */
+        .submit-btn-wrapper {
+            flex-shrink: 0; /* Minimum yer tutur */
+            display: flex;
+            justify-content: center;
+            padding: 15px 0 10px 0; 
+            background: #000000;
+            z-index: 10;
+        }
+
+        .submit-btn {
+            width: 60px; /* Kiçildildi */
+            height: 60px; /* Kiçildildi */
+            border-radius: 50%;
+            border: none;
+            background: #28a745; 
+            color: #ffffff;
+            font-size: 26px; /* Kiçildildi */
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            transition: background 0.2s;
+        }
+
+        .submit-btn:hover {
+            background: #3cb859;
+        }
+
+        .backspace-icon {
+            transform: scaleX(-1);
+            display: inline-block;
+        }
+        
+        #statusMessage {
+            text-align: center;
+            margin-top: 10px; /* Kiçildildi */
+            font-weight: bold;
+            height: 15px; 
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <form id="financialForm" method="POST" style="display: flex; flex-direction: column; height: 100%;">
+        <!-- Gizli Sahələr -->
+        <input type="hidden" name="Tarix" id="Tarix" value="">
+        <input type="hidden" name="Emeliyyat" id="Emeliyyat" value="Xərc">
+        <input type="hidden" name="Mebleg" id="Mebleg_Hidden" value="0">
+
+        <!-- Yuxarı hissə: Toggle, Məbləğ, Kateqoriya, Status -->
+        <div class="top-section">
+            <!-- 1. Expense/Income Seçimi -->
+            <div class="toggle-switch">
+                <button type="button" class="toggle-button active-expense" id="expenseBtn">Xərc</button>
+                <button type="button" class="toggle-button" id="incomeBtn">Gəlir</button>
+            </div>
+
+            <!-- 2. Məbləğ Görüntüsü -->
+            <div class="amount-display">
+                <span class="currency">₼</span>
+                <h1 id="amountText">0</h1>
+            </div>
+
+            <!-- 3. Kateqoriya Seçimi -->
+            <div class="category-select-wrapper">
+                <select name="Kateqoriya" id="Kateqoriya" required>
+                    <option value="" disabled selected>Kateqoriya seçin</option>
+                    <!-- Kateqoriyalar JS ilə doldurulacaq -->
+                </select>
+            </div>
+            <div id="statusMessage"></div>
+        </div>
+
+        <!-- 4. Rəqəmsal Klaviatura (Qalan boşluğu doldurur) -->
+        <div class="keypad-wrapper">
+            <div class="keypad">
+                <div class="key" data-value="1">1</div>
+                <div class="key" data-value="2">2</div>
+                <div class="key" data-value="3">3</div>
+                <div class="key" data-value="4">4</div>
+                <div class="key" data-value="5">5</div>
+                <div class="key" data-value="6">6</div>
+                <div class="key" data-value="7">7</div>
+                <div class="key" data-value="8">8</div>
+                <div class="key" data-value="9">9</div>
+                <div class="key" data-value=".">.</div>
+                <div class="key" data-value="0">0</div>
+                <div class="key backspace" data-value="backspace"><span class="backspace-icon">↤</span></div>
+            </div>
+        </div>
+        
+        <!-- 5. Təsdiq Düyməsi (Aşağıya bərkidilir) -->
+        <div class="submit-btn-wrapper">
+            <button type="submit" class="submit-btn" id="submitButton">✓</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    // **! DİQQƏT: Bu URL-i öz Google Apps Script Web App URL-nizlə əvəz edin !**
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyg7NeqwoOa7htikxJyxQtLp9P6pIotyLg0o3_NTMsU1_4r5iamFiQ6KefRLF-J9PknXQ/exec";
+    
+    // YENİ KATEQORİYA MƏLUMATLARI
+    const categories = {
+        'Gəlir': [
+            "Əməkhaqqı", "Təqaüd", "Mükafat", "Məzuniyyət / Ezam", "ƏDV/CashBack", 
+            "Borc Qaytarması", "Satış", "Əlavə Gəlir", "Kredit xətti", 
+            "Borc alınması", "Kredit alınması"
+        ],
+        'Xərc': [
+            "Kredit ödənişi", "Komissiya", "Taksit ödənişi", "Borc qaytarması", 
+            "Kirayə", "Komunnal", "Kontur", "İnternet", "Təhsil", "Siqaret", 
+            "Yol", "Ərzaq", "Restoran", "Rüsum", "Təmir tikinti", "Tibb", 
+            "Tibb (Ana)", "Ev (Quba)", "İdman", "Hobby", "Hədiyyə", "Geyim", 
+            "Əşya", "Digər", "Borc verilməsi", "Toy", "Əyləncə", "Bərbər", 
+            "Təmizlik vasitələri", "İş üçün", "Səyahət", "Heyvan məhsulları", 
+            "Bağ"
+        ]
+    };
+
+    // Elementlər
+    const form = document.getElementById('financialForm');
+    const amountText = document.getElementById('amountText');
+    const amountHidden = document.getElementById('Mebleg_Hidden');
+    const expenseBtn = document.getElementById('expenseBtn');
+    const incomeBtn = document.getElementById('incomeBtn');
+    const emeliyyatHidden = document.getElementById('Emeliyyat');
+    const dateInput = document.getElementById('Tarix');
+    const statusMessage = document.getElementById('statusMessage');
+    const categorySelect = document.getElementById('Kateqoriya');
+    const submitButton = document.getElementById('submitButton');
+    
+    let currentAmount = "0";
+
+    // 1. Klaviaturanın İşlənməsi 
+    document.querySelectorAll('.key').forEach(key => {
+        key.addEventListener('click', () => {
+            const value = key.getAttribute('data-value');
+            
+            if (value === 'backspace') {
+                if (currentAmount.length > 1) {
+                    currentAmount = currentAmount.slice(0, -1);
+                } else {
+                    currentAmount = "0";
+                }
+            } else if (value === '.') {
+                if (!currentAmount.includes('.')) {
+                    currentAmount += '.';
+                }
+            } else if (currentAmount === "0") {
+                currentAmount = value;
+            } else {
+                if (currentAmount.includes('.')) {
+                    const decimalPart = currentAmount.split('.')[1];
+                    if (decimalPart.length < 2) {
+                        currentAmount += value;
+                    }
+                } else {
+                    currentAmount += value;
+                }
+            }
+
+            if (currentAmount.startsWith('0') && currentAmount.length > 1 && !currentAmount.startsWith('0.')) {
+                currentAmount = currentAmount.substring(1);
+            }
+            
+            amountText.textContent = currentAmount;
+            amountHidden.value = currentAmount; 
+        });
+    });
+
+    // 2. Kateqoriyaların Doldurulması 
+    function populateCategories(type) {
+        categorySelect.innerHTML = '<option value="" disabled selected>Kateqoriya seçin</option>';
+
+        if (categories[type]) {
+            categories[type].forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                categorySelect.appendChild(option);
+            });
+        }
+    }
+
+    // 3. Əməliyyat Seçimi 
+    function setOperation(type) {
+        emeliyyatHidden.value = type;
+        
+        if (type === 'Xərc') {
+            expenseBtn.classList.add('active-expense');
+            incomeBtn.classList.remove('active-income');
+        } else {
+            expenseBtn.classList.remove('active-expense');
+            incomeBtn.classList.add('active-income');
+        }
+        
+        populateCategories(type);
+    }
+
+    expenseBtn.addEventListener('click', () => setOperation('Xərc'));
+    incomeBtn.addEventListener('click', () => setOperation('Gəlir'));
+
+    // Tarixi təyin et
+    function setTodayDate() {
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0'); 
+        const dd = String(today.getDate()).padStart(2, '0');
+        dateInput.value = `${yyyy}-${mm}-${dd}`; 
+    }
+    setTodayDate();
+    setOperation('Xərc');
+
+
+    // 4. FETCH API İSTİFADƏ EDƏRƏK GÖNDƏRMƏ 
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        // İlkin yoxlamalar
+        if (parseFloat(currentAmount) <= 0 || categorySelect.value === "") {
+            statusMessage.textContent = "Məbləğ və Kateqoriya seçilməlidir.";
+            statusMessage.style.color = '#dc3545'; 
+            setTimeout(() => statusMessage.textContent = '', 3000);
+            return;
+        }
+
+        statusMessage.textContent = 'Göndərilir...';
+        statusMessage.style.color = '#ffc107'; // Sarı
+        submitButton.disabled = true; // Təkrar göndərmənin qarşısını al
+
+        const formData = new FormData(form);
+
+        try {
+            // Fetch API istifadə etməklə Apps Script-ə POST müraciəti
+            const response = await fetch(GAS_WEB_APP_URL, {
+                method: 'POST',
+                body: formData,
+            });
+            
+            const result = await response.json(); 
+
+            if (result && result.result === 'success') {
+                // Uğurla yazılıb
+                statusMessage.textContent = 'Məlumat uğurla göndərildi!';
+                statusMessage.style.color = '#28a745'; // Yaşıl
+                
+                // Formu Sıfırla
+                currentAmount = "0";
+                amountText.textContent = "0";
+                amountHidden.value = "0";
+                categorySelect.value = ""; 
+                setOperation('Xərc'); 
+            } else {
+                // Apps Script-dən gələn xəta 
+                const errorMsg = result.error || "Bilinməyən daxili xəta.";
+                statusMessage.textContent = `Xəta baş verdi: ${errorMsg}`;
+                statusMessage.style.color = '#dc3545'; // Qırmızı
+                console.error("Apps Script Error:", errorMsg);
+            }
+
+        } catch (error) {
+            // Şəbəkə və ya CORS xətası 
+            statusMessage.textContent = `Şəbəkə Xətası: Form göndərilmədi. Konsolu yoxlayın.`;
+            statusMessage.style.color = '#dc3545'; 
+            console.error("Fetch Error:", error);
+        } finally {
+            submitButton.disabled = false;
+            setTimeout(() => statusMessage.textContent = '', 4000);
+        }
+    });
+</script>
+
+</body>
+</html>
